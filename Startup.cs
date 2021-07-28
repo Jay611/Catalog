@@ -77,7 +77,11 @@ namespace Catalog
 				app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Catalog v1"));
 			}
 
-			app.UseHttpsRedirection();
+			if (env.IsDevelopment())
+			{
+				app.UseHttpsRedirection();
+			}
+
 
 			app.UseRouting();
 
@@ -90,15 +94,18 @@ namespace Catalog
 				endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
 				{
 					Predicate = (check) => check.Tags.Contains("ready"),
-					ResponseWriter = async(context, report) => {
+					ResponseWriter = async (context, report) =>
+					{
 						var result = JsonSerializer.Serialize(
-							new{
+							new
+							{
 								status = report.Status.ToString(),
-								checks = report.Entries.Select(entry => new {
+								checks = report.Entries.Select(entry => new
+								{
 									name = entry.Key,
 									status = entry.Value.Status.ToString(),
 									exception = entry.Value.Exception != null ? entry.Value.Exception.Message : "none",
-									duration =  entry.Value.Duration.ToString()
+									duration = entry.Value.Duration.ToString()
 								})
 							}
 						);
